@@ -1,0 +1,14 @@
+{
+  "name": "notice-change-reviewer",
+  "version": "1.0.1",
+  "private": true,
+  "description": "Local, evidence-linked comparison of explicitly labeled Japanese notices",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node scripts/serve.js",
+    "test": "node --test tests/*.test.js",
+    "check": "node scripts/check.js && npm test",
+    "benchmark": "node scripts/benchmark.js",
+    "test:browser": "node scripts/browser-test.js"
+  }
+}

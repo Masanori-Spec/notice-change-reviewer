@@ -140,7 +140,9 @@
     try {
       showResults(window.NoticeReviewAnalyzer.analyze(beforeInput.value, afterInput.value));
     } catch (error) {
-      formError.textContent = "比較中に問題が起きました。文面を短くして、もう一度お試しください。";
+      formError.textContent = error && error.code === "OUTPUT_LIMIT"
+        ? "比較候補・確認メモ・根拠の量が上限を超えました。結果の一部だけを表示せず比較を中止しました。文面を項目ごとに分けて、もう一度お試しください。"
+        : "比較中に問題が起きました。文面を短くして、もう一度お試しください。";
       formError.hidden = false;
     } finally {
       analyzeButton.disabled = false;

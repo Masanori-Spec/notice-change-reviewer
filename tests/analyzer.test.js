@@ -2,7 +2,8 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { analyze, extract } = require("../src/analyzer.js");
+const analyzer = require("../src/analyzer.js");
+const { analyze, extract } = analyzer;
 const demo = require("../demo/sample-data.js");
 
 test("synthetic demo finds schedule, deadline, location and a new required action with evidence", () => {
@@ -250,4 +251,44 @@ test("an empty location label requests manual review", () => {
   const found = extract("場所：");
   assert.deepEqual(found.fields.location, []);
   assert.ok(found.notes.some(note => note.includes("場所を読み取れませんでした")));
+});
+
+test("bounds distinct extracted records per input without returning partial results", () => {
+  const lines = n => Array.from({length:n}, (_,i) => `場所：合成${i}`).join("\n");
+  assert.equal(analyzer.extract(lines(analyzer.MAX_EXTRACTED_RECORDS)).fields.location.length, analyzer.MAX_EXTRACTED_RECORDS);
+  assert.throws(() => analyzer.extract(lines(analyzer.MAX_EXTRACTED_RECORDS + 1)), error => error.code === "OUTPUT_LIMIT");
+  assert.throws(() => analyzer.analyze(lines(analyzer.MAX_EXTRACTED_RECORDS + 1), "場所：合成A"), error => error.code === "OUTPUT_LIMIT");
+  assert.throws(() => analyzer.analyze("場所：合成A", lines(analyzer.MAX_EXTRACTED_RECORDS + 1)), error => error.code === "OUTPUT_LIMIT");
+  assert.equal(analyzer.extract("場所：合成A\n".repeat(500)).fields.location.length,1);
+});
+test("bounds repeated empty datetime warnings before quadratic work or DOM amplification", () => {
+  const input = "日時:\n".repeat(7500);
+  assert.equal(input.length, analyzer.MAX_INPUT_LENGTH);
+  assert.throws(() => analyzer.analyze(input,input), error => error.code === "OUTPUT_LIMIT");
+  const boundary = "日時:\n".repeat(analyzer.MAX_REVIEW_NOTES / 2);
+  assert.equal(analyzer.extract(boundary).notes.length, analyzer.MAX_REVIEW_NOTES);
+  assert.throws(() => analyzer.extract(boundary+"日時:\n"), error => error.code === "OUTPUT_LIMIT");
+});
+test("bounds repeated long evidence even when candidate counts are within the limit", () => {
+  const dates = (count, offset) => "開催日：" + Array.from({length:count},(_,i)=>`${i+offset}/01/01`).join("、");
+  const before = dates(100,1000), after = dates(100,5000);
+  assert.equal(analyzer.extract(before).fields.eventDate.length,100);
+  assert.throws(() => analyzer.analyze(before,after), error => error.code === "OUTPUT_LIMIT");
+  assert.equal(analyzer.analyze(dates(90,1000),dates(90,5000)).changes.length,180);
+  assert.throws(() => analyzer.analyze(dates(2726,1000),dates(2726,5000)), error => error.code === "OUTPUT_LIMIT");
+});
+test("known limitation: start/end role swaps are not differences in a same-value set", () => {
+  const result = analyzer.analyze("開始時刻：13:00 終了時刻：14:00", "開始時刻：14:00 終了時刻：13:00");
+  assert.deepEqual(result.changes,[]);
+});
+
+test("supported dates cannot silently hide recognizable yearless date candidates", () => {
+  for(const value of ["2026/10/20、10/21", "2026年10月20日、10月21日", "2026-10-20、10-21"]) {
+    const result = extract("開催日："+value);
+    assert.deepEqual(result.fields.eventDate.map(record=>record.value),["2026-10-20"]);
+    assert.match(result.notes.join(" "),/未対応・不正な日付/);
+    assert.ok(extract("締切："+value).notes.length>0);
+    assert.equal(extract("締切："+value+" 17:00").fields.deadline.length,0);
+  }
+  assert.equal(extract("開催日：2026/10/20").notes.length,0);
 });

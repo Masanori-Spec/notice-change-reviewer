@@ -74,3 +74,14 @@ test("packaged browser scripts initialize in HTML order without CommonJS", () =>
   assert.equal(nodes["result-count"].textContent, "5 件");
   assert.equal(nodes["change-list"].children.length, 5);
 });
+
+test("bounded-output rejection has a specific split-input message and no partial cards", () => {
+  const n = app(); compare(n);
+  n["before-text"].value = "日時:\n".repeat(7500);
+  n["analyze-button"].fire("click");
+  assert.equal(n.results.hidden,true);
+  assert.equal(n["change-list"].children.length,0);
+  assert.match(n["form-error"].textContent,/量が上限.*比較を中止/);
+  assert.equal(n["analyze-button"].disabled,false);
+  compare(n); assert.equal(n["form-error"].hidden,true); assert.equal(n.results.hidden,false);
+});

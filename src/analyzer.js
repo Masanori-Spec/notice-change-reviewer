@@ -2,6 +2,15 @@
   "use strict";
 
   var MAX_INPUT_LENGTH = 30000;
+  var MAX_EXTRACTED_RECORDS = 200;
+  var MAX_REVIEW_NOTES = 200;
+  var MAX_RESULT_EVIDENCE_LENGTH = 200000;
+
+  function outputLimitError() {
+    var error = new RangeError("比較候補・確認メモ・根拠の量が上限を超えました。文面を項目ごとに分けてください。");
+    error.code = "OUTPUT_LIMIT";
+    return error;
+  }
   var FIELDS = [
     { key: "eventDate", label: "開催日" },
     { key: "eventTime", label: "時刻" },
@@ -55,6 +64,10 @@
         found.push({ value: parts[1] + "-" + pad2(Number(parts[2])) + "-" + pad2(Number(parts[3])) });
       }
     }
+    // A supported explicit-year date must not hide a recognizable yearless one.
+    // Remove whole date tokens first so their month/day suffixes are not re-read.
+    var residual = text.replace(pattern, " ");
+    if (/(?<!\d)\d{1,2}\s*(?:月\s*\d{1,2}\s*日|[/-]\s*\d{1,2})(?!\d)/.test(residual)) invalid = true;
     return { values: found, invalid: invalid };
   }
 
@@ -138,19 +151,24 @@
     return segments;
   }
 
-  function addRecord(target, record) {
-    if (!target.some(function (existing) { return existing.value === record.value; })) target.push(record);
-  }
-
   function extract(text) {
     text = String(text || "");
     if (text.length > MAX_INPUT_LENGTH) throw new RangeError("入力はそれぞれ30,000文字以内にしてください。");
     var fields = { eventDate: [], eventTime: [], location: [], deadline: [], action: [] };
     var notes = [];
+    var recordCount = 0;
     var lines = String(text || "").replace(/\r\n?/g, "\n").split("\n");
 
     function note(message, lineNumber) {
+      if (notes.length >= MAX_REVIEW_NOTES) throw outputLimitError();
       notes.push(message + "（" + lineNumber + "行目）。");
+    }
+
+    function addRecord(target, record) {
+      if (target.some(function (existing) { return existing.value === record.value; })) return;
+      if (recordCount >= MAX_EXTRACTED_RECORDS) throw outputLimitError();
+      recordCount += 1;
+      target.push(record);
     }
 
     function extractSegment(segment, lineNumber) {
@@ -218,7 +236,7 @@
   }
 
   function unique(values) {
-    return values.filter(function (value, index) { return values.indexOf(value) === index; });
+    return Array.from(new Set(values));
   }
 
   function compareField(field, beforeRecords, afterRecords, notes) {
@@ -252,10 +270,16 @@
     FIELDS.forEach(function (field) {
       changes = changes.concat(compareField(field, before.fields[field.key], after.fields[field.key], notes));
     });
+    var evidenceLength = 0;
+    changes.forEach(function (change) {
+      if (change.before) evidenceLength += change.before.evidence.text.length;
+      if (change.after) evidenceLength += change.after.evidence.text.length;
+      if (evidenceLength > MAX_RESULT_EVIDENCE_LENGTH) throw outputLimitError();
+    });
     return { changes: changes, notes: unique(notes), before: before.fields, after: after.fields };
   }
 
-  var api = { analyze: analyze, extract: extract, MAX_INPUT_LENGTH: MAX_INPUT_LENGTH };
+  var api = { analyze: analyze, extract: extract, MAX_INPUT_LENGTH: MAX_INPUT_LENGTH, MAX_EXTRACTED_RECORDS: MAX_EXTRACTED_RECORDS, MAX_REVIEW_NOTES: MAX_REVIEW_NOTES, MAX_RESULT_EVIDENCE_LENGTH: MAX_RESULT_EVIDENCE_LENGTH };
   if (typeof module === "object" && module.exports) module.exports = api;
   if (scope) scope.NoticeReviewAnalyzer = api;
 })(typeof globalThis === "object" ? globalThis : this);
