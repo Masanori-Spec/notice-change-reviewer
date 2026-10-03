@@ -5,7 +5,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
         with:
@@ -14,10 +14,21 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Syntax checks
-        run: |
-          node --check src/analyzer.js
-          node --check src/app.js
-          node --check demo/sample-data.js
-      - name: Unit and controller tests
-        run: node --test tests/*.test.js
+      - name: Syntax, unit and controller checks
+        run: npm run check
+      - name: Measure bounded synthetic extraction
+        run: npm run benchmark
+      - name: Install pinned official browser tooling
+        run: npm install --no-save --ignore-scripts playwright@1.62.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Real browser functionality, privacy and responsive checks
+        run: npm run test:browser
+      - name: Retain synthetic test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notice-change-reviewer-evidence
+          path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
