@@ -8,6 +8,7 @@ const { chromium } = require("playwright");
 const { createServer } = require("./serve.js");
 const demo = require("../demo/sample-data.js");
 const output = path.join(__dirname, "../artifacts");
+const inputTimings = [];
 const checks = [], requests = [], unexpectedRequests = [], errors = [], csp = [], dialogs = [], captures = [], timings = [];
 let server, browser, page;
 const allowedPaths = new Set(["/", "/index.html", "/styles.css", "/src/analyzer.js", "/src/app.js", "/demo/sample-data.js", "/favicon.ico"]);
@@ -24,8 +25,13 @@ const compare = async () => {
   await page.locator("#results").waitFor({state: "visible"});
 };
 const fill = async (before, after) => {
-  await page.locator("#before-text").fill(before);
-  await page.locator("#after-text").fill(after);
+  for (const [id,value] of [["before-text",before],["after-text",after]]) {
+    const start=performance.now();
+    await page.locator(`#${id}`).fill(value);
+    const elapsed=performance.now()-start;
+    inputTimings.push({id,units:value.length,lines:value.split("\n").length,ms:+elapsed.toFixed(2)});
+    assert.ok(elapsed<10000,"Synthetic text insertion exceeded10s responsiveness budget");
+  }
 };
 const loadDemo = async () => { await page.getByRole("button", {name: "合成デモを読み込む"}).click(); };
 const noStaleResults = async () => {
@@ -67,6 +73,7 @@ const capture = async name => {
     await context.exposeBinding("recordCsp", (_source, event) => csp.push(event));
     await context.addInitScript(() => document.addEventListener("securitypolicyviolation", event => window.recordCsp({directive: event.violatedDirective, blockedURI: event.blockedURI})));
     context.on("page", tab => {
+      tab.on("crash", () => errors.push("Page renderer crashed"));
       tab.on("pageerror", error => errors.push(error.message));
       tab.on("dialog", dialog => {dialogs.push({type: dialog.type(), message: dialog.message()}); dialog.dismiss();});
     });
@@ -225,12 +232,26 @@ const capture = async name => {
     await check("output amplification and excessive warnings reject fully then recover", async () => {
       const dates = offset => "開催日："+Array.from({length:2726},(_,i)=>`${i+offset}/01/01`).join("、");
       const repeatedEvidence = offset => "開催日："+Array.from({length:100},(_,i)=>`${i+offset}/01/01`).join("、");
-      for(const [before,after] of [
-        ["日時:\n".repeat(7500),"日時:\n".repeat(7500)],
-        [dates(1000),dates(5000)],
-        [repeatedEvidence(1000),repeatedEvidence(5000)]
+      for(const [before,after,controlledInsertion] of [
+        ["日時:\n".repeat(101),"日時:\n".repeat(101),false],
+        ["日時:\n".repeat(7500),"日時:\n".repeat(7500),true],
+        [dates(1000),dates(5000),false],
+        [repeatedEvidence(1000),repeatedEvidence(5000),false]
       ]) {
-        await fill(before,after);
+        if(controlledInsertion) {
+          // Chromium's native insertion of thousands of newlines can stall before
+          // application code: microsoft/playwright#33761 and the first CI run.
+          // This one fixture tests the real parser/UI after controlled insertion.
+          // The 101-line case above tests the same warning guard with real fill.
+          await page.evaluate(([before,after])=>{
+            for(const [id,value] of [["before-text",before],["after-text",after]]) {
+              const input=document.getElementById(id);input.value=value;
+              input.dispatchEvent(new Event("input",{bubbles:true}));
+            }
+          },[before,after]);
+          assert.equal((await page.locator("#before-text").inputValue()).length,30000);
+          assert.equal((await page.locator("#after-text").inputValue()).length,30000);
+        } else await fill(before,after);
         const start=performance.now(); await page.locator("#analyze-button").click();
         await noStaleResults();
         assert.match(await page.getByRole("alert").innerText(),/量が上限.*比較を中止/);
@@ -269,15 +290,15 @@ const capture = async name => {
       assert.ok(requests.length>=5);
       assert.ok(requests.every(request=>new URL(request.url).origin===origin && !new URL(request.url).search && allowedPaths.has(new URL(request.url).pathname) && request.method==="GET"));
     });
-    const report={measuredAt:new Date().toISOString(),sourceCommit:process.env.GITHUB_SHA||null,node:process.version,playwright:require("playwright/package.json").version,chromium:browser.version(),checks,captures,timings,errors,csp,unexpectedRequests,dialogs,requests:requests.map(request=>({...request,url:request.url.replace(origin,"<local-origin>")})),limitations:["Synthetic Chromium automation on a loopback HTTP server; no physical-device, other-browser, file:// or screen-reader verification.","Input exception recovery uses one controlled analyzer stub; ordinary comparisons use the real parser and DOM.","Mobile checks change viewport size and do not emulate a physical touch device.","No external application requests were observed; an allowlist aborts and fails on attempted non-asset requests. This is not a security audit.","Screenshot files capture layout evidence; automated overflow checks are not complete visual or accessibility validation.","Timings include one Playwright click-to-DOM observation, not a stable latency benchmark or user-device guarantee."]};
+    const report={measuredAt:new Date().toISOString(),sourceCommit:process.env.GITHUB_SHA||null,node:process.version,playwright:require("playwright/package.json").version,chromium:browser.version(),checks,captures,timings,inputTimings,errors,csp,unexpectedRequests,dialogs,requests:requests.map(request=>({...request,url:request.url.replace(origin,"<local-origin>")})),limitations:["Synthetic Chromium automation on a loopback HTTP server; no physical-device, other-browser, file:// or screen-reader verification.","Input exception recovery uses one controlled analyzer stub. The 7500-line fixture uses controlled value/input-event insertion because native Chromium fill stalled in the first CI run; the 101-line warning guard uses normal fill and all comparisons use real parser/DOM.","Mobile checks change viewport size and do not emulate a physical touch device.","No external application requests were observed; an allowlist aborts and fails on attempted non-asset requests. This is not a security audit.","Screenshot files capture layout evidence; automated overflow checks are not complete visual or accessibility validation.","Timings include one Playwright click-to-DOM observation, not a stable latency benchmark or user-device guarantee."]};
     await fs.writeFile(path.join(output,"browser-results.json"),JSON.stringify(report,null,2)+"\n");
     console.log(JSON.stringify(report,null,2));
   } catch(error) {
+    await fs.writeFile(path.join(output,"browser-failure.json"),JSON.stringify({checks,error:String(error).slice(0,2000),errors,csp,unexpectedRequests,inputTimings},null,2)+"\n");
     if(page)await page.screenshot({path:path.join(output,"failure.png"),fullPage:true}).catch(()=>{});
-    await fs.writeFile(path.join(output,"browser-failure.json"),JSON.stringify({checks,error:String(error),errors,csp,unexpectedRequests},null,2)+"\n");
     throw error;
   } finally {
     if(browser)await browser.close();
     if(server)await new Promise(resolve=>server.close(resolve));
   }
-})().catch(error=>{console.error(error);process.exitCode=1;});
+})().catch(error=>{console.error(String(error).slice(0,2000));process.exitCode=1;});
