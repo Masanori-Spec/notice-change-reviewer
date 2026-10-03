@@ -14,6 +14,7 @@ class Node {
   setAttribute(name, value) { this.attributes[name] = value; }
   addEventListener(event, listener) { this.listeners[event] = listener; }
   focus() { this.focused = true; }
+  setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end; }
   fire(event) { this.listeners[event](); }
 }
 function app(override = {}) {
@@ -84,4 +85,14 @@ test("bounded-output rejection has a specific split-input message and no partial
   assert.match(n["form-error"].textContent,/量が上限.*比較を中止/);
   assert.equal(n["analyze-button"].disabled,false);
   compare(n); assert.equal(n["form-error"].hidden,true); assert.equal(n.results.hidden,false);
+});
+
+
+test("demo and swap reset caret and textarea scrolling to the new document start", () => {
+  const n = app();
+  for(const button of ["demo-button","swap-button"]) {
+    for(const id of ["before-text","after-text"]) {n[id].scrollTop=500;n[id].scrollLeft=100;n[id].selectionStart=20;}
+    n[button].fire("click");
+    for(const id of ["before-text","after-text"]) {assert.equal(n[id].scrollTop,0);assert.equal(n[id].scrollLeft,0);assert.equal(n[id].selectionStart,0);assert.equal(n[id].selectionEnd,0);}
+  }
 });

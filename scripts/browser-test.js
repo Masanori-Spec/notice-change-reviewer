@@ -33,7 +33,12 @@ const fill = async (before, after) => {
     assert.ok(elapsed<10000,"Synthetic text insertion exceeded10s responsiveness budget");
   }
 };
-const loadDemo = async () => { await page.getByRole("button", {name: "合成デモを読み込む"}).click(); };
+const inputStarts = async () => {
+  const state=await page.locator("textarea").evaluateAll(inputs=>inputs.map(input=>({id:input.id,scrollTop:input.scrollTop,scrollLeft:input.scrollLeft,selectionStart:input.selectionStart,selectionEnd:input.selectionEnd})));
+  for(const input of state) assert.deepEqual(input,{id:input.id,scrollTop:0,scrollLeft:0,selectionStart:0,selectionEnd:0});
+  return state;
+};
+const loadDemo = async () => { await page.getByRole("button", {name: "合成デモを読み込む"}).click(); await inputStarts(); };
 const noStaleResults = async () => {
   assert.equal(await page.locator("#results").isVisible(), false);
   assert.equal(await page.locator(".change-card").count(), 0);
@@ -49,7 +54,8 @@ const capture = async name => {
   const state = await page.evaluate(() => ({width: innerWidth, height: innerHeight, scrollX, scrollY, scrollWidth: document.documentElement.scrollWidth, cards: document.querySelectorAll(".change-card").length}));
   assert.equal(state.scrollX, 0); assert.equal(state.scrollY, 0);
   assert.ok(state.scrollWidth <= state.width);
-  captures.push({name, ...state});
+  const inputs=await inputStarts();
+  captures.push({name, ...state, inputs});
   await page.screenshot({path: path.join(output, `${name}.png`), fullPage: true, animations: "disabled"});
 };
 (async () => {
@@ -138,7 +144,7 @@ const capture = async name => {
     await check("swap invalidates results and recomparison reverses evidence direction", async () => {
       await loadDemo(); await compare();
       await page.getByRole("button", {name: "変更前と変更後を入れ替える"}).click();
-      await noStaleResults();
+      await noStaleResults(); await inputStarts();
       assert.equal(await page.locator("#before-text").inputValue(), demo.after);
       assert.equal(await page.locator("#after-text").inputValue(), demo.before);
       assert.equal(await page.locator("#after-text").evaluate(el => el === document.activeElement), true);
@@ -267,7 +273,7 @@ const capture = async name => {
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth<=innerWidth),true);
         const a=await page.locator("#before-text").boundingBox(), b=await page.locator("#after-text").boundingBox();
         assert.ok(b.y>a.y+a.height);
-        await page.locator("#swap-button").click(); await noStaleResults(); await compare();
+        await page.locator("#swap-button").click(); await noStaleResults(); await inputStarts(); await compare();
         assert.deepEqual((await readCards(page))[0].values,["2026-10-25","2026-10-24"]);
         await page.locator("#after-text").fill("場所："+"A".repeat(1000)); await noStaleResults(); await compare();
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth<=innerWidth),true);

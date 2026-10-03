@@ -23,6 +23,12 @@
     output.textContent = input.value.length.toLocaleString("ja-JP") + " 文字";
   }
 
+  function resetInputViewport(input) {
+    input.setSelectionRange(0, 0);
+    input.scrollTop = 0;
+    input.scrollLeft = 0;
+  }
+
   function renderEvidence(label, record, emptyText) {
     var side = element("div", "evidence-side");
     side.appendChild(element("span", "evidence-label", label));
@@ -111,6 +117,8 @@
     updateCount(afterInput, afterCount);
     invalidateResults();
     beforeInput.focus();
+    resetInputViewport(beforeInput);
+    resetInputViewport(afterInput);
   });
 
   document.getElementById("swap-button").addEventListener("click", function () {
@@ -121,6 +129,8 @@
     updateCount(afterInput, afterCount);
     invalidateResults();
     afterInput.focus();
+    resetInputViewport(beforeInput);
+    resetInputViewport(afterInput);
   });
 
   document.getElementById("analyze-button").addEventListener("click", function () {
