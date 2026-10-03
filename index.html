@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="theme-color" content="#f4f7fb">
+    <meta name="description" content="大学などのお知らせ文面を手動で比較し、日程・場所・締切・必要な対応の差を根拠付きで確認するローカルツール。">
+    <title>お知らせ変更レビュー</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="src/analyzer.js"></script>
+    <script defer src="demo/sample-data.js"></script>
+    <script defer src="src/app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="お知らせ変更レビュー ホーム">
+        <span class="brand-mark" aria-hidden="true">差</span>
+        <span>変更レビュー</span>
+      </a>
+      <div class="privacy-mark"><span class="privacy-dot" aria-hidden="true"></span>このブラウザ内で処理</div>
+    </header>
+
+    <main class="page">
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">NOTICE CHANGE REVIEWER <span>·</span> LOCAL FIRST</p>
+        <h1 id="page-title">お知らせの変更を、<br class="mobile-break">対応の差分で確認する。</h1>
+        <p class="intro-copy">変更前と変更後の文面を貼り付けると、日程・時刻・場所・締切・必須対応を見比べます。各結果には、確認に使った原文の行を添えます。</p>
+        <div class="privacy-note" role="note">
+          <span class="privacy-icon" aria-hidden="true">↳</span>
+          <span><strong>入力内容は送信も保存もしません。</strong>このページの解析は端末内だけで実行します。学内ポータルやメールにも接続しません。</span>
+        </div>
+      </section>
+
+      <section class="compare-panel" aria-label="比較する文面">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">01 <span>·</span> COMPARE</p>
+            <h2>2つの文面を用意</h2>
+          </div>
+          <button class="button button-quiet" id="demo-button" type="button">合成デモを読み込む <span aria-hidden="true">↗</span></button>
+        </div>
+        <div class="editor-grid">
+          <label class="editor-card" for="before-text">
+            <span class="editor-label"><span class="version-dot version-old"></span>変更前 <small>OLD VERSION</small></span>
+            <textarea id="before-text" spellcheck="false" autocomplete="off" placeholder="変更前のお知らせをここに貼り付けます。" aria-describedby="paste-hint"></textarea>
+            <span class="editor-foot"><span class="char-count" id="before-count">0 文字</span><span>原文をそのまま貼り付け</span></span>
+          </label>
+          <label class="editor-card" for="after-text">
+            <span class="editor-label"><span class="version-dot version-new"></span>変更後 <small>NEW VERSION</small></span>
+            <textarea id="after-text" spellcheck="false" autocomplete="off" placeholder="変更後のお知らせをここに貼り付けます。" aria-describedby="paste-hint"></textarea>
+            <span class="editor-foot"><span class="char-count" id="after-count">0 文字</span><span>原文をそのまま貼り付け</span></span>
+          </label>
+        </div>
+        <p class="sr-only" id="paste-hint">個人情報を含まない合成文面でお試しください。このアプリは入力欄の内容を保存しません。各文面は30,000文字以内です。</p>
+        <div class="compare-actions">
+          <p class="helper-copy">各文面30,000文字まで。日付は「2026年10月24日」など年と項目名を付けてください。</p>
+          <div class="button-row">
+            <button class="button button-quiet" id="swap-button" type="button" aria-label="変更前と変更後を入れ替える">入れ替え</button>
+            <button class="button button-primary" id="analyze-button" type="button"><span aria-hidden="true">⌕</span> 変更を確認</button>
+          </div>
+        </div>
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+      </section>
+
+      <section class="results" id="results" aria-labelledby="results-title" aria-live="polite" hidden>
+        <div class="section-heading result-heading">
+          <div>
+            <p class="eyebrow">02 <span>·</span> REVIEW</p>
+            <h2 id="results-title">確認ポイント</h2>
+          </div>
+          <p class="result-count" id="result-count"></p>
+        </div>
+        <div id="review-notes" class="review-notes" hidden></div>
+        <div id="change-list" class="change-list"></div>
+        <p class="scope-footnote">これは固定ルールで拾えた項目の比較です。自動判定は原文確認を助けるもので、文面全体の意味や変更の見落としがないことは保証しません。</p>
+      </section>
+
+      <section class="how-section" aria-labelledby="how-title">
+        <p class="eyebrow">DESIGNED FOR MANUAL REVIEW</p>
+        <h2 id="how-title">見つけた差分に、確かめる手がかりを。</h2>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <span class="feature-number">01</span>
+            <h3>項目ごとに整理</h3>
+            <p>開催日と締切を分け、時刻・場所・必須対応をひと目で並べます。</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-number">02</span>
+            <h3>根拠行を表示</h3>
+            <p>変更前後それぞれの行番号と原文を見て、差分を人が確認できます。</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-number">03</span>
+            <h3>曖昧さを残す</h3>
+            <p>複数候補を勝手に結び付けず、原文を確認するよう知らせます。</p>
+          </article>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>お知らせ変更レビュー <span class="footer-separator">/</span> AI支援で制作</span>
+        <span>接続なし · 依存パッケージなし · 合成データのデモ</span>
+      </footer>
+    </main>
+  </body>
+</html>
