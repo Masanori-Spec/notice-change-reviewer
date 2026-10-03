@@ -1,0 +1,29 @@
+{
+  "sourceCommit": "b124b6053b8cbc987342875f38dbabaa1321b48e",
+  "workflowRunId": 37102829606,
+  "workflowUrl": "https://github.com/Masanori-Spec/notice-change-reviewer/actions/runs/37102829606",
+  "jobId": 111145577827,
+  "conclusion": "success",
+  "nodeTests": 48,
+  "browserScenarios": 20,
+  "artifactId": 11266568853,
+  "artifactZipSha256": "a211cfa203ddef511d7a59e784678ff5022c18929fc3aae4082659f970d2960a",
+  "files": [
+    {
+      "path": "docs/screenshots/desktop.png",
+      "sha256": "4acb4921405cdadcfdfb13dc2ca89fe2ae56983e16900f083b497097c9545534"
+    },
+    {
+      "path": "docs/screenshots/mobile-320.png",
+      "sha256": "dfde0b0a504a10391d25a7e6aba299185362856ff21a4090fafdfab2d2760995"
+    },
+    {
+      "path": "docs/screenshots/mobile-390.png",
+      "sha256": "a64658f4ce6ba2272e3b73536667285437b25ae9310be81dad0bfc992d472e46"
+    }
+  ],
+  "priorRunLimitation": {
+    "url": "https://github.com/Masanori-Spec/notice-change-reviewer/actions/runs/37102167767",
+    "description": "Native Chromium filling of the synthetic7500-line textarea timed out before analysis. That single extreme fixture now uses explicitly controlled value/input-event setup, with native101-line overflow coverage retained."
+  }
+}

@@ -1,0 +1,332 @@
+{
+  "measuredAt": "2026-10-03T06:23:05.901Z",
+  "sourceCommit": "b124b6053b8cbc987342875f38dbabaa1321b48e",
+  "node": "v24.21.0",
+  "playwright": "1.62.1",
+  "chromium": "151.0.7922.34",
+  "checks": [
+    "empty initial state has named inputs, status regions and no result",
+    "keyboard-only Tab, Enter and Space activate the real controls",
+    "demo DOM matches independent exact values, evidence and line numbers",
+    "repeated comparison does not duplicate cards or leave button disabled",
+    "editing either input removes old cards, count and review notes",
+    "swap invalidates results and recomparison reverses evidence direction",
+    "reloading the demo resets edited inputs and clears stale output",
+    "empty and whitespace inputs fail accessibly and recover",
+    "30001 UTF-16 units are rejected and the exact 30000 boundary completes",
+    "malformed calendar dates and time precision produce review notes",
+    "same-line event and deadline retain separate exact source excerpts",
+    "multiple locations remain explicit additions/removals with a warning",
+    "HTML-like values and evidence remain inert literal text",
+    "analysis exceptions clear results and leave a usable retry path",
+    "long malformed numbers and dense results complete on the real DOM",
+    "output amplification and excessive warnings reject fully then recover",
+    "390px and 320px layouts allow real editing, swap and comparison without overflow",
+    "reduced-motion preference suppresses decorative transitions",
+    "runtime uses no browser storage and reload starts without application results",
+    "all instrumented UI flows have no page errors, CSP violations or non-asset requests"
+  ],
+  "captures": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 1100,
+      "scrollX": 0,
+      "scrollY": 0,
+      "scrollWidth": 1440,
+      "cards": 5,
+      "inputs": [
+        {
+          "id": "before-text",
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "selectionStart": 0,
+          "selectionEnd": 0
+        },
+        {
+          "id": "after-text",
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "selectionStart": 0,
+          "selectionEnd": 0
+        }
+      ]
+    },
+    {
+      "name": "mobile-390",
+      "width": 390,
+      "height": 844,
+      "scrollX": 0,
+      "scrollY": 0,
+      "scrollWidth": 390,
+      "cards": 5,
+      "inputs": [
+        {
+          "id": "before-text",
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "selectionStart": 0,
+          "selectionEnd": 0
+        },
+        {
+          "id": "after-text",
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "selectionStart": 0,
+          "selectionEnd": 0
+        }
+      ]
+    },
+    {
+      "name": "mobile-320",
+      "width": 320,
+      "height": 844,
+      "scrollX": 0,
+      "scrollY": 0,
+      "scrollWidth": 320,
+      "cards": 5,
+      "inputs": [
+        {
+          "id": "before-text",
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "selectionStart": 0,
+          "selectionEnd": 0
+        },
+        {
+          "id": "after-text",
+          "scrollTop": 0,
+          "scrollLeft": 0,
+          "selectionStart": 0,
+          "selectionEnd": 0
+        }
+      ]
+    }
+  ],
+  "timings": [
+    {
+      "name": "30000 digits",
+      "beforeLength": 30000,
+      "afterLength": 21,
+      "cards": 2,
+      "clickToDomMs": 46.26
+    },
+    {
+      "name": "200 distinct locations per side",
+      "beforeLength": 1889,
+      "afterLength": 1889,
+      "cards": 400,
+      "clickToDomMs": 155.74
+    }
+  ],
+  "inputTimings": [
+    {
+      "id": "before-text",
+      "units": 30001,
+      "lines": 1,
+      "ms": 26.83
+    },
+    {
+      "id": "after-text",
+      "units": 6,
+      "lines": 1,
+      "ms": 9.83
+    },
+    {
+      "id": "before-text",
+      "units": 30000,
+      "lines": 1,
+      "ms": 25.17
+    },
+    {
+      "id": "after-text",
+      "units": 6,
+      "lines": 1,
+      "ms": 7.79
+    },
+    {
+      "id": "before-text",
+      "units": 4,
+      "lines": 1,
+      "ms": 9.81
+    },
+    {
+      "id": "after-text",
+      "units": 4,
+      "lines": 1,
+      "ms": 9.04
+    },
+    {
+      "id": "before-text",
+      "units": 48,
+      "lines": 3,
+      "ms": 5.79
+    },
+    {
+      "id": "after-text",
+      "units": 48,
+      "lines": 3,
+      "ms": 6.79
+    },
+    {
+      "id": "before-text",
+      "units": 43,
+      "lines": 1,
+      "ms": 4.95
+    },
+    {
+      "id": "after-text",
+      "units": 43,
+      "lines": 1,
+      "ms": 7.43
+    },
+    {
+      "id": "before-text",
+      "units": 13,
+      "lines": 2,
+      "ms": 4.91
+    },
+    {
+      "id": "after-text",
+      "units": 13,
+      "lines": 2,
+      "ms": 5.94
+    },
+    {
+      "id": "before-text",
+      "units": 6,
+      "lines": 1,
+      "ms": 4.83
+    },
+    {
+      "id": "after-text",
+      "units": 121,
+      "lines": 1,
+      "ms": 8.32
+    },
+    {
+      "id": "before-text",
+      "units": 30000,
+      "lines": 1,
+      "ms": 15.76
+    },
+    {
+      "id": "after-text",
+      "units": 21,
+      "lines": 1,
+      "ms": 6.53
+    },
+    {
+      "id": "before-text",
+      "units": 1889,
+      "lines": 200,
+      "ms": 123.46
+    },
+    {
+      "id": "after-text",
+      "units": 1889,
+      "lines": 200,
+      "ms": 135.84
+    },
+    {
+      "id": "before-text",
+      "units": 404,
+      "lines": 102,
+      "ms": 56
+    },
+    {
+      "id": "after-text",
+      "units": 404,
+      "lines": 102,
+      "ms": 65.29
+    },
+    {
+      "id": "before-text",
+      "units": 29989,
+      "lines": 1,
+      "ms": 81.57
+    },
+    {
+      "id": "after-text",
+      "units": 29989,
+      "lines": 1,
+      "ms": 86.73
+    },
+    {
+      "id": "before-text",
+      "units": 1103,
+      "lines": 1,
+      "ms": 5.71
+    },
+    {
+      "id": "after-text",
+      "units": 1103,
+      "lines": 1,
+      "ms": 5.37
+    }
+  ],
+  "errors": [],
+  "csp": [],
+  "unexpectedRequests": [],
+  "dialogs": [],
+  "requests": [
+    {
+      "url": "<local-origin>/",
+      "method": "GET",
+      "type": "document"
+    },
+    {
+      "url": "<local-origin>/styles.css",
+      "method": "GET",
+      "type": "stylesheet"
+    },
+    {
+      "url": "<local-origin>/src/analyzer.js",
+      "method": "GET",
+      "type": "script"
+    },
+    {
+      "url": "<local-origin>/demo/sample-data.js",
+      "method": "GET",
+      "type": "script"
+    },
+    {
+      "url": "<local-origin>/src/app.js",
+      "method": "GET",
+      "type": "script"
+    },
+    {
+      "url": "<local-origin>/",
+      "method": "GET",
+      "type": "document"
+    },
+    {
+      "url": "<local-origin>/styles.css",
+      "method": "GET",
+      "type": "stylesheet"
+    },
+    {
+      "url": "<local-origin>/src/analyzer.js",
+      "method": "GET",
+      "type": "script"
+    },
+    {
+      "url": "<local-origin>/demo/sample-data.js",
+      "method": "GET",
+      "type": "script"
+    },
+    {
+      "url": "<local-origin>/src/app.js",
+      "method": "GET",
+      "type": "script"
+    }
+  ],
+  "limitations": [
+    "Synthetic Chromium automation on a loopback HTTP server; no physical-device, other-browser, file:// or screen-reader verification.",
+    "Input exception recovery uses one controlled analyzer stub. The 7500-line fixture uses controlled value/input-event insertion because native Chromium fill stalled in the first CI run; the 101-line warning guard uses normal fill and all comparisons use real parser/DOM.",
+    "Mobile checks change viewport size and do not emulate a physical touch device.",
+    "No external application requests were observed; an allowlist aborts and fails on attempted non-asset requests. This is not a security audit.",
+    "Screenshot files capture layout evidence; automated overflow checks are not complete visual or accessibility validation.",
+    "Timings include one Playwright click-to-DOM observation, not a stable latency benchmark or user-device guarantee."
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "measuredAt": "2026-10-03T06:22:26.655Z",
+  "node": "v24.21.0",
+  "platform": "linux",
+  "architecture": "x64",
+  "cpu": "AMD EPYC 7763 64-Core Processor",
+  "repeats": 7,
+  "warmups": 1,
+  "measurements": [
+    {
+      "name": "synthetic demo",
+      "beforeLength": 115,
+      "afterLength": 133,
+      "rejected": false,
+      "changes": 5,
+      "notes": 0,
+      "medianMs": 0.254,
+      "maxMs": 0.637
+    },
+    {
+      "name": "30000 repeated digits",
+      "beforeLength": 30000,
+      "afterLength": 21,
+      "rejected": false,
+      "changes": 2,
+      "notes": 2,
+      "medianMs": 2.238,
+      "maxMs": 2.741
+    },
+    {
+      "name": "30000 whitespace characters",
+      "beforeLength": 30000,
+      "afterLength": 21,
+      "rejected": false,
+      "changes": 2,
+      "notes": 2,
+      "medianMs": 0.563,
+      "maxMs": 0.579
+    },
+    {
+      "name": "200 distinct location lines per side",
+      "beforeLength": 1889,
+      "afterLength": 1889,
+      "rejected": false,
+      "changes": 400,
+      "notes": 1,
+      "medianMs": 1.985,
+      "maxMs": 2.172
+    },
+    {
+      "name": "30000 empty datetime-label characters (bounded rejection)",
+      "beforeLength": 30000,
+      "afterLength": 30000,
+      "rejected": true,
+      "changes": 0,
+      "notes": 0,
+      "medianMs": 0.516,
+      "maxMs": 1.168
+    },
+    {
+      "name": "75 malformed dates per side",
+      "beforeLength": 1125,
+      "afterLength": 1125,
+      "rejected": false,
+      "changes": 0,
+      "notes": 150,
+      "medianMs": 0.732,
+      "maxMs": 4.217
+    }
+  ],
+  "limitation": "Synthetic Node.js extraction timings only; excludes DOM rendering and does not prove latency on user devices or all possible inputs."
+}

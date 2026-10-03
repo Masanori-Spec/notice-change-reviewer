@@ -33,11 +33,19 @@ npm run test:browser
 
 ## 追加したブラウザー検証と現在の状態
 
-この文章を作成した時点で、今回追加したブラウザースイートはまだ実行していません。GitHub上で公開した対象コミットのCI結果を確認してから、結果を追記します。以前のクラウドブラウザーによるローカルQA接続は `net::ERR_BLOCKED_BY_CLIENT` で遮断されており、その制限を迂回・再試行していません。
+[GitHub CI実行37102829606](https://github.com/Masanori-Spec/notice-change-reviewer/actions/runs/37102829606)は、コミット `b124b6053b8cbc987342875f38dbabaa1321b48e` に対して成功しました。Node.js v24.21.0 / Playwright 1.62.1 / Chromium 151.0.7922.34で、Nodeテスト48件とブラウザーシナリオ20件が通過しました。
 
-初回CIでは15シナリオが通過した後、7,500行の値をtextareaへ入れるPlaywrightの `fill` が解析開始前にタイムアウトしました。[Playwrightの既報](https://github.com/microsoft/playwright/issues/33761)と類似したネイティブ挿入の制約です。この極端な1入力だけはvalue設定とinputイベントで準備し、実際の解析・クリック・エラー表示を確認します。同じ警告上限は101行の通常fillでも検証します。7,500行のネイティブ挿入が速いという主張はしません。
+- [ブラウザーの実測報告](browser-results.json)、[CIでの抽出計測](ci-benchmark-results.json)、[実行・成果物の出典](ci-evidence.json)
+- [デスクトップ画像](screenshots/desktop.png)、[390px画像](screenshots/mobile-390.png)、[320px画像](screenshots/mobile-320.png)
+- 3枚の画像を目視確認し、デモの先頭、5件の差分、根拠、狭い画面での縦配置を確認。自動検査でも両textareaのカーソル・スクロールが先頭であることを確認
+- 30,000桁の数字はクリックからDOM確認まで46.26ms、200候補ずつ・400カードは155.74ms。この1回のCI観測は入力の貼り付け時間を含まず、一般的な応答速度保証ではない
+- 観測したアプリの要求は同一ループバックの静的アセットのみ。未捕捉エラー・CSP違反・未許可要求は0件
 
-スイートは上記の例外を明示した上で、UI操作とDOMに対して次を確認する設計です。
+以前のクラウドブラウザーによるローカルQA接続は `net::ERR_BLOCKED_BY_CLIENT` で遮断されました。この制限は迂回・再試行せず、公開ソースを通常のGitHub CI上で別途検証しました。
+
+[初回CI](https://github.com/Masanori-Spec/notice-change-reviewer/actions/runs/37102167767)では15シナリオが通過した後、7,500行の値をtextareaへ入れるPlaywrightの `fill` が解析開始前にタイムアウトしました。[Playwrightの既報](https://github.com/microsoft/playwright/issues/33761)と類似しており、解析とは別の挿入経路の制約と考えられます。この極端な1入力だけはvalue設定とinputイベントで準備し、実際の解析・クリック・エラー表示を確認します。同じ警告上限は101行の通常fillでも検証します。7,500行のネイティブ挿入が速いという主張はしません。
+
+スイートは上記の例外を明示した上で、UI操作とDOMに対して次を確認しました。
 
 - 合成デモ5件の独立した期待値、変更方向、原文の抜粋、行番号
 - Tab・Enter・Spaceによる操作、フォーカス表示、入力の名前、通知領域の基本的な属性
@@ -63,6 +71,7 @@ npm run test:browser
 ## 未確認・残る限界
 
 - Chrome/Edge/Firefox/Safariの横断テスト、実端末、file://でのCSP互換性、画面読み上げ、網羅的なアクセシビリティ監査は未確認
+- 7,500行のネイティブ挿入はタイムアウトしたまま未確認。value設定後の検証に合格したことと、通常の大量貼り付けが快適であることは別です
 - モバイル検証は画面幅の変更であり、物理端末やタッチ入力そのものの検証ではない
 - CSP・DOM・通信検査は実行した合成ケースの範囲で、セキュリティ監査や将来の安全性を保証しない
 - 固定ルールで、自然言語の意味理解、複雑な否定、年なし日付の推測、PDF/画像/URL取得、曜日変更の意味は扱わない

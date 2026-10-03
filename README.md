@@ -4,6 +4,12 @@
 
 汎用のテキスト diff ではなく、決めたルールで読めた項目だけを整理します。複数候補を自動で結び付けてしまう場合は、追加・削除と確認メモを表示します。人が原文を見ることを前提にしています。
 
+## 検証結果
+
+[GitHub CI](https://github.com/Masanori-Spec/notice-change-reviewer/actions/runs/37102829606)で、Nodeテスト48件とChromiumのブラウザーシナリオ20件が通過しました。デスクトップ・390px・320pxで、入力編集後の古い結果の削除、入れ替え、キーボード操作、出力上限、通信・保存の基本検査を確認しています。
+
+[デスクトップ画面](docs/screenshots/desktop.png) / [モバイル幅390px](docs/screenshots/mobile-390.png) / [320px](docs/screenshots/mobile-320.png) は実際の合成デモのスクリーンショットです。実機・他ブラウザー・網羅的なアクセシビリティは未確認です。7,500行の極端な入力はネイティブ挿入がタイムアウトしたため、解析・画面検証の入力準備だけを制御しており、通常の大量貼り付けが速いという主張はしません。対象コミットと詳しい範囲は[検証記録](docs/verification.md)にあります。
+
 ## 試す
 
 1. index.html を Chrome、Edge、Firefox などのブラウザーで開きます。
